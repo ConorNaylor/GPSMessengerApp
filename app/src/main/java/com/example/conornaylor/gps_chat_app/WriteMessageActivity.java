@@ -20,20 +20,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 public class WriteMessageActivity extends AppCompatActivity implements LocationListener {
 
-    EditText text;
-    Button upload;
-    FirebaseDatabase db;
-    String message;
-    LocationData locationData;
-    DatabaseReference myRef;
-    boolean locChanged = false;
+    private EditText text;
+    private Button upload;
+    private String message, serverMessage;
+    private LocationData locationData;
+    private FirebaseDatabase db;
+    private DatabaseReference myRef;
+    private double d1, d2;
+    private boolean uniqueLoc = true;
+    private String lt = "lat";
+    private String lg = "lng";
+    private Location currentLocation = new Location("");
+    private Location serverLocation = new Location("");
+    private LocationManager lm;
+    private boolean locRead = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,32 +56,78 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
         startGettingLocations();
 
         text = (EditText) findViewById(R.id.message);
-
         upload = (Button) findViewById(R.id.upload);
+
+        db = FirebaseDatabase.getInstance();
+        myRef = db.getReference("Messages");
 
         upload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    message = text.getText().toString();
+                message = text.getText().toString();
 
-                    db = FirebaseDatabase.getInstance();
+                if(locRead){
+                    Toast.makeText(WriteMessageActivity.this, "Location Read: " + locationData,
+                            Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Toast.makeText(WriteMessageActivity.this, "Location hasn't been read!",
+                            Toast.LENGTH_LONG).show();
+                }
 
-                    myRef = db.getReference("Messages");
-
+                if (uniqueLoc){
                     myRef.child(message).setValue(locationData);
 
-                    Intent homeIntent = new Intent(WriteMessageActivity.this, HomeActivity.class);
-                    startActivity(homeIntent);
+                } else {
+                    myRef.child(serverMessage + "   " + message).setValue(locationData);
+                    myRef.child(serverMessage).removeValue();
                 }
+
+                Intent homeIntent = new Intent(WriteMessageActivity.this, HomeActivity.class);
+                startActivity(homeIntent);
+            }
 
         });
     }
 
-
     @Override
     public void onLocationChanged(Location location) {
         locationData = new LocationData(location.getLatitude(), location.getLongitude());
+
+        Toast.makeText(WriteMessageActivity.this, "Location Received",
+                Toast.LENGTH_LONG).show();
+
+        locRead = true;
+
+        currentLocation.setLatitude(locationData.lat);
+        currentLocation.setLongitude(locationData.lng);
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+
+                    d1 = new Double(child.child(lt).getValue().toString());
+                    d2 = new Double(child.child(lg).getValue().toString());
+
+                    serverLocation.setLatitude(d1);
+                    serverLocation.setLongitude(d2);
+
+                    if(currentLocation.distanceTo(serverLocation) <= 10){
+                        uniqueLoc = false;
+                        serverMessage = child.getKey();
+                        break;
+                    }
+                }
             }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                System.out.println("Couldn't read database");
+            }
+        });
+                lm.removeUpdates(this);
+    }
 
 
     @Override
@@ -88,7 +147,7 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
 
     private void startGettingLocations() {
 
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         boolean isGPS = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
         boolean isNetwork = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         boolean canGetLocation = true;
@@ -130,25 +189,28 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
 
         //Starts requesting location updates
         if (canGetLocation) {
-            if (isGPS) {
-                lm.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-
-            } else if (isNetwork) {
+            if (isNetwork) {
                 // from Network Provider
-
+                Toast.makeText(WriteMessageActivity.this, "Reading location from Network",
+                        Toast.LENGTH_LONG).show();
                 lm.requestLocationUpdates(
                         LocationManager.NETWORK_PROVIDER,
                         MIN_TIME_BW_UPDATES,
                         MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
             }
+            else if (isGPS) {
+                Toast.makeText(WriteMessageActivity.this, "Reading location from GPS",
+                        Toast.LENGTH_LONG).show();
+                lm.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+
+            }
         }
         else{
             Toast.makeText(this, "Can't get location", Toast.LENGTH_SHORT).show();
         }
-//        lm.removeUpdates(this);
     }
 
     private ArrayList findUnAskedPermissions(ArrayList<String> wanted) {
@@ -192,5 +254,9 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
         });
 
         alertDialog.show();
+    }
+
+    public void onBackPressed(){
+        finish();
     }
 }

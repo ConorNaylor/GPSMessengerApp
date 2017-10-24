@@ -80,4 +80,11 @@ public class SeeMapActivity extends FragmentActivity implements OnMapReadyCallba
         mMap = googleMap;
 
     }
+
+
+    @Override
+    public void onBackPressed(){
+        finish();
+    }
+
 }

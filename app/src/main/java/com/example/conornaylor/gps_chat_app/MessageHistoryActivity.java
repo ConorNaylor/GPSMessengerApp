@@ -47,4 +47,9 @@ public class MessageHistoryActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed(){
+        finish();
+    }
 }
