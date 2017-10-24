@@ -47,6 +47,7 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
     private Location serverLocation = new Location("");
     private LocationManager lm;
     private boolean locRead = false;
+    private Button back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,7 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
 
         text = (EditText) findViewById(R.id.message);
         upload = (Button) findViewById(R.id.upload);
+        back = (Button) findViewById(R.id.back);
 
         db = FirebaseDatabase.getInstance();
         myRef = db.getReference("Messages");
@@ -65,15 +67,6 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
             @Override
             public void onClick(View v) {
                 message = text.getText().toString();
-
-                if(locRead){
-                    Toast.makeText(WriteMessageActivity.this, "Location Read: " + locationData,
-                            Toast.LENGTH_LONG).show();
-                }
-                else{
-                    Toast.makeText(WriteMessageActivity.this, "Location hasn't been read!",
-                            Toast.LENGTH_LONG).show();
-                }
 
                 if (uniqueLoc){
                     myRef.child(message).setValue(locationData);
@@ -85,6 +78,17 @@ public class WriteMessageActivity extends AppCompatActivity implements LocationL
 
                 Intent homeIntent = new Intent(WriteMessageActivity.this, HomeActivity.class);
                 startActivity(homeIntent);
+                finish();
+            }
+
+        });
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent homeIntent = new Intent(WriteMessageActivity.this, HomeActivity.class);
+                startActivity(homeIntent);
+                finish();
             }
 
         });
