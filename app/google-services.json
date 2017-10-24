@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "720327324023",
+    "firebase_url": "https://gps-chat-app-57421.firebaseio.com",
+    "project_id": "gps-chat-app-57421",
+    "storage_bucket": "gps-chat-app-57421.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720327324023:android:f44d86c759247451",
+        "android_client_info": {
+          "package_name": "com.example.conornaylor.gps_chat_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "720327324023-95v5h1a89em8nnlfbhlfmoahsgcgk703.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.conornaylor.gps_chat_app",
+            "certificate_hash": "c67f280c1c228415b5de798c3d43fb2f7683eb31"
+          }
+        },
+        {
+          "client_id": "720327324023-oc1va62rtj0mhe5jthl32caig5ravpbk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGvTBANEYSsW2gVTcoWG8RKHz2O2rcKqQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "720327324023-oc1va62rtj0mhe5jthl32caig5ravpbk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
